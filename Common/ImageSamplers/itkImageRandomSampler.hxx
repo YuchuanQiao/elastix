@@ -31,6 +31,15 @@ namespace itk
  */
 
 template< class TInputImage >
+ImageRandomSampler< TInputImage >
+::ImageRandomSampler()
+{
+  this->m_SetRandomSampleContainer = false;
+}
+/**
+ * ******************* GenerateData *******************
+ */
+template< class TInputImage >
 void
 ImageRandomSampler< TInputImage >
 ::GenerateData( void )
@@ -61,6 +70,33 @@ ImageRandomSampler< TInputImage >
 
   if( mask.IsNull() )
   {
+    if ( this->m_SetRandomSampleContainer == true )
+    {
+      ImageSampleType tempSample;
+      SizeValueType innerNumberOfSpatialSamples = this ->GetNumberOfSamples();
+      SizeValueType numberOfSpatialSamples = this->m_RandomSampleContainer->Size();
+      SizeValueType randomSamplerNumber;
+      sampleContainer->Initialize();
+      for ( unsigned int n = 0; n < innerNumberOfSpatialSamples ; ++n)
+      {
+         //SizeValueType randomSamplerNumber = (numberOfSpatialSamples /innerNumberOfSpatialSamples) *( n -1 ) + this->m_itp + std::rand();
+         //randomSamplerNumber = (numberOfSpatialSamples /innerNumberOfSpatialSamples) *( n );
+         randomSamplerNumber = std::rand();
+         if ( randomSamplerNumber > numberOfSpatialSamples )
+         {
+           randomSamplerNumber = randomSamplerNumber % numberOfSpatialSamples;
+         }
+         if ( randomSamplerNumber == numberOfSpatialSamples )
+         {
+           randomSamplerNumber = 0;
+         }
+         tempSample = this->m_RandomSampleContainer -> GetElement( randomSamplerNumber );
+        sampleContainer->push_back( tempSample );
+      }
+      SizeValueType lenthOfSampleContainer = sampleContainer->Size();
+    } 
+    else
+    {
     /** number of samples + 1, because of the initial ++randIter. */
     randIter.SetNumberOfSamples( this->GetNumberOfSamples() + 1 );
     /** Advance one, in order to generate the same sequence as when using a mask */
@@ -77,6 +113,7 @@ ImageRandomSampler< TInputImage >
       ++randIter;
 
     } // end for loop
+  }
   } // end if no mask
   else
   {
@@ -202,6 +239,18 @@ ImageRandomSampler< TInputImage >
 } // end ThreadedGenerateData()
 
 
+/**
+ * ******************* SetRandomSampleContainer *******************
+ */
+template< class TInputImage >
+void
+ImageRandomSampler< TInputImage >
+::SetRandomSampleContainer(ImageSampleContainerPointer & randomSampleContainer, SizeValueType itp)
+{
+  this->m_SetRandomSampleContainer = true;
+  this->m_RandomSampleContainer = randomSampleContainer;
+  this->m_itp = itp;
+}
 } // end namespace itk
 
 #endif // end #ifndef __ImageRandomSampler_hxx

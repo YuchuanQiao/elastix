@@ -82,7 +82,7 @@ StandardStochasticVarianceReducedGradientOptimizer
     ::Compute_a(double k) const
   {
     return static_cast<double>(
-      this->m_Param_a / vcl_pow( this->m_Param_A + k + 1.0, this->m_Param_alpha ) );
+      this->m_Param_a / std::pow( this->m_Param_A + k + 1.0, this->m_Param_alpha ) );
 
   } // end Compute_a
 
@@ -97,7 +97,7 @@ StandardStochasticVarianceReducedGradientOptimizer
     ::Compute_beta(double k) const
   {
     return static_cast<double>(
-      this->m_Param_beta / vcl_pow( this->m_Param_A + k + 1.0, this->m_Param_alpha ) );
+      this->m_Param_beta / std::pow( this->m_Param_A + k + 1.0, this->m_Param_alpha ) );
 
   } // end Compute_beta
 

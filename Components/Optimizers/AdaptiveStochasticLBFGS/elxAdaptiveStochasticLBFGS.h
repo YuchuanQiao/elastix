@@ -52,22 +52,11 @@ namespace elastix
   *
   * This optimization method is described in the following references:
   *
-  * [1] P. Cruz,
-  * "Almost sure convergence and asymptotical normality of a generalization of Kesten's
-  * stochastic approximation algorithm for multidimensional case."
-  * Technical Report, 2005. http://hdl.handle.net/2052/74
-  *
-  * [2] S. Klein, J.P.W. Pluim, and M. Staring, M.A. Viergever,
-  * "Adaptive stochastic gradient descent optimisation for image registration,"
-  * International Journal of Computer Vision, vol. 81, no. 3, pp. 227-239, 2009.
-  * http://dx.doi.org/10.1007/s11263-008-0168-y
-  *
-  * Acceleration in case of many transform parameters was proposed in the following paper:
-  *
-  * [3]  Y.Qiao, B.P.F. Lelieveldt, M.Staring
-  * "Fast automatic estimation of the optimization step size for nonrigid image registration,"
-  * SPIE Medical Imaging: Image Processing,February, 2014.
-  * http://elastix.isi.uu.nl/marius/publications/2014_c_SPIEMI.php
+  * [1]  Y.Qiao, Z.Sun, B.P.F. Lelieveldt, M.Staring
+  * "A stochastic quasi-newton method for non-rigid image registration,"
+  * In International Conference on Medical Image Computing and Computer-Assisted
+  * Intervention, pp. 297-304. Springer, Cham, 2015.
+  * https://www.researchgate.net/profile/Yuchuan_Qiao/publication/281550100_A_Stochastic_Quasi-Newton_Method_for_Non-rigid_Image_Registration/links/55ed565b08ae21d099c74cba.pdf
   *
   * The parameters used in this class are:
   * \parameter Optimizer: Select this optimizer as follows:\n
@@ -104,92 +93,11 @@ namespace elastix
   *   example: <tt>(MaximumStepLength 1.0)</tt>\n
   *   Default: mean voxel spacing of fixed and moving image. This seems to work well in general.
   *   This parameter only has influence when AutomaticParameterEstimation is used.
-  * \parameter SP_a: The gain \f$a(k)\f$ at each iteration \f$k\f$ is defined by \n
-  *   \f$a(k) =  SP\_a / (SP\_A + k + 1)^{SP\_alpha}\f$. \n
-  *   SP_a can be defined for each resolution. \n
-  *   example: <tt>(SP_a 3200.0 3200.0 1600.0)</tt> \n
-  *   The default value is 400.0. Tuning this variable for you specific problem is recommended.
-  *   Alternatively set the AutomaticParameterEstimation to "true". In that case, you do not
-  *   need to specify SP_a. SP_a has no influence when AutomaticParameterEstimation is used.
-  * \parameter SP_A: The gain \f$a(k)\f$ at each iteration \f$k\f$ is defined by \n
-  *   \f$a(k) =  SP\_a / (SP\_A + k + 1)^{SP\_alpha}\f$. \n
-  *   SP_A can be defined for each resolution. \n
-  *   example: <tt>(SP_A 50.0 50.0 100.0)</tt> \n
-  *   The default/recommended value for this particular optimizer is 20.0.
-  * \parameter SP_alpha: The gain \f$a(k)\f$ at each iteration \f$k\f$ is defined by \n
-  *   \f$a(k) =  SP\_a / (SP\_A + k + 1)^{SP\_alpha}\f$. \n
-  *   SP_alpha can be defined for each resolution. \n
-  *   example: <tt>(SP_alpha 0.602 0.602 0.602)</tt> \n
-  *   The default/recommended value for this particular optimizer is 1.0.
-  *   Alternatively set the AutomaticParameterEstimation to "true". In that case, you do not
-  *   need to specify SP_alpha. SP_alpha has no influence when AutomaticParameterEstimation is used.
-  * \parameter SigmoidMax: The maximum of the sigmoid function (\f$f_{max}\f$). Must be larger than 0.
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(SigmoidMax 1.0)</tt>\n
-  *   Default/recommended value: 1.0. This parameter has no influence when AutomaticParameterEstimation
-  *   is used. In that case, always a value 1.0 is used.
-  * \parameter SigmoidMin: The minimum of the sigmoid function (\f$f_{min}\f$). Must be smaller than 0.
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(SigmoidMin -0.8)</tt>\n
-  *   Default value: -0.8. This parameter has no influence when AutomaticParameterEstimation
-  *   is used. In that case, the value is automatically determined, depending on the images,
-  *   metric etc.
-  * \parameter SigmoidScale: The scale/width of the sigmoid function (\f$\omega\f$).
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(SigmoidScale 0.00001)</tt>\n
-  *   Default value: 1e-8. This parameter has no influence when AutomaticParameterEstimation
-  *   is used. In that case, the value is automatically determined, depending on the images,
-  *   metric etc.
-  * \parameter SigmoidInitialTime: the initial time input for the sigmoid (\f$t_0\f$). Must be
-  *   larger than 0.0.
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(SigmoidInitialTime 0.0 5.0 5.0)</tt>\n
-  *   Default value: 0.0. When increased, the optimization starts with smaller steps, leaving
-  *   the possibility to increase the steps when necessary. If set to 0.0, the method starts with
-  *   with the largest step allowed.
-  * \parameter NumberOfGradientMeasurements: Number of gradients N to estimate the
-  *   average square magnitudes of the exact gradient and the approximation error.
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(NumberOfGradientMeasurements 10)</tt>\n
-  *   Default value: 0, which means that the value is automatically estimated.
-  *   In principle, the more the better, but the slower. In practice N=10 is usually sufficient.
-  *   But the automatic estimation achieved by N=0 also works good.
-  *   The parameter has only influence when AutomaticParameterEstimation is used.
-  * \parameter NumberOfJacobianMeasurements: The number of voxels M where the Jacobian is measured,
-  *   which is used to estimate the covariance matrix.
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(NumberOfJacobianMeasurements 5000 10000 20000)</tt>\n
-  *   Default value: M = max( 1000, nrofparams ), with nrofparams the
-  *   number of transform parameters. This is a rather crude rule of thumb,
-  *   which seems to work in practice. In principle, the more the better, but the slower.
-  *   The parameter has only influence when AutomaticParameterEstimation is used.
-  * \parameter NumberOfSamplesForExactGradient: The number of image samples used to compute
-  *   the 'exact' gradient. The samples are chosen on a uniform grid.
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(NumberOfSamplesForExactGradient 100000)</tt>\n
-  *   Default/recommended: 100000. This works in general. If the image is smaller, the number
-  *   of samples is automatically reduced. In principle, the more the better, but the slower.
-  *   The parameter has only influence when AutomaticParameterEstimation is used.
-  * \parameter ASGDParameterEstimationMethod: The ASGD parameter estimation method used
-  *   in this optimizer.
-  *   The parameter can be specified for each resolution.\n
-  *   example: <tt>(ASGDParameterEstimationMethod "Original")</tt>\n
-  *         or <tt>(ASGDParameterEstimationMethod "DisplacementDistribution")</tt>\n
-  *   Default: Original.
-  * \parameter MaximumDisplacementEstimationMethod: The suitable position selection method used only for
-  *   displacement distribution estimation method.
-  *   The parameter can be specified for each resolution.\n
-  *   example: <tt>(MaximumDisplacementEstimationMethod "2sigma")</tt>\n
-  *         or <tt>(MaximumDisplacementEstimationMethod "95percentile")</tt>\n
-  *   Default: 2sigma.
-  * \parameter NoiseCompensation: Selects whether or not to use noise compensation.
-  *   The parameter can be specified for each resolution, or for all resolutions at once.\n
-  *   example: <tt>(NoiseCompensation "true")</tt>\n
-  *   Default/recommended: true.
+  *
   *
   * \todo: this class contains a lot of functional code, which actually does not belong here.
   *
-  * \sa AdaptiveStochasticVarianceReducedGradientOptimizer
+  * \sa AdaptiveStochasticLBFGS
   * \ingroup Optimizers
   */
 

@@ -361,7 +361,7 @@ void StochasticVarianceReducedGradientDescentOptimizer
   const unsigned int spaceDimension
     = this->GetScaledCostFunction()->GetNumberOfParameters();
   const unsigned int subSize = static_cast<unsigned int>(
-    vcl_ceil( static_cast<double>( spaceDimension )
+    std::ceil( static_cast<double>( spaceDimension )
     / static_cast<double>( this->m_Threader->GetNumberOfThreads() ) ) );
   const unsigned int jmin = threadId * subSize;
   unsigned int jmax = ( threadId + 1 ) * subSize;

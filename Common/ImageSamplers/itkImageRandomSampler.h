@@ -77,10 +77,12 @@ public:
   typedef typename InputImageType::IndexType InputImageIndexType;
   typedef typename InputImageType::PointType InputImagePointType;
 
+  virtual void SetRandomSampleContainer(
+    ImageSampleContainerPointer & randomSampleContainer, SizeValueType itp);
 protected:
 
   /** The constructor. */
-  ImageRandomSampler() {}
+  ImageRandomSampler();
   /** The destructor. */
   virtual ~ImageRandomSampler() {}
 
@@ -98,6 +100,9 @@ private:
   /** The private copy constructor. */
   void operator=( const Self & );            // purposely not implemented
 
+  bool                          m_SetRandomSampleContainer;
+  ImageSampleContainerPointer   m_RandomSampleContainer;
+  SizeValueType                 m_itp;
 };
 
 } // end namespace itk

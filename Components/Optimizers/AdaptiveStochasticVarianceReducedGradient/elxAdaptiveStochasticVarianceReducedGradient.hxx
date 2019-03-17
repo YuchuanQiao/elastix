@@ -561,10 +561,10 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
 
   const unsigned int M = this->GetElastix()->GetNumberOfMetrics();
 
-  std::vector< ImageRandomSamplerBasePointer >  samplerVec( M, 0);
-  std::vector< ImageRandomSamplerPointer >      randomSamplerVec( M, 0);    
-  std::vector< ImageRandomSamplerPointer >      subRandomSamplerVec( M, 0);
-  std::vector< ImageRadomSampleContainerPointer > randomSampleContainer( M, 0);
+  std::vector< ImageRandomSamplerBasePointer >  samplerVec( M );
+  std::vector< ImageRandomSamplerPointer >      randomSamplerVec( M );
+  std::vector< ImageRandomSamplerPointer >      subRandomSamplerVec( M );
+  std::vector< ImageRadomSampleContainerPointer > randomSampleContainer( M );
   /** set the number of samples. */
 //  unsigned int innerNumberOfSpatialSamples = 10;
   //unsigned int innerLoopIterations = 50;
@@ -589,7 +589,7 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
 
     for( unsigned int m = 0; m < M; ++m )
     {
-     ImageSamplerBasePointer sampler = 
+     ImageSamplerBasePointer sampler =
        this->GetElastix()->GetElxMetricBase(m)->GetAdvancedMetricImageSampler();
      samplerVec[ m ] =
        dynamic_cast< ImageRandomSamplerBaseType * >( sampler.GetPointer() );
@@ -631,7 +631,7 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
     //
     for( unsigned int m = 0; m < M; ++m )
     {
-      ImageSamplerBasePointer sampler = 
+      ImageSamplerBasePointer sampler =
         this->GetElastix()->GetElxMetricBase(m)->GetAdvancedMetricImageSampler();
       samplerVec[ m ] =
         dynamic_cast< ImageRandomSamplerBaseType * >( sampler.GetPointer() );
@@ -906,7 +906,7 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
     if( TrCC > 1e-14 && TrC > 1e-14 )
     {
       this->m_NumberOfGradientMeasurements = static_cast<unsigned int>(
-        vcl_ceil( 8.0 * TrCC / TrC / TrC / (K-1) / (K-1) ) );
+        std::ceil( 8.0 * TrCC / TrC / TrC / (K-1) / (K-1) ) );
     }
     else
     {
@@ -926,7 +926,7 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
   double ee = 0.0;
   if( maxJJ > 1e-14 )
   {
-    sigma4 = sigma4factor * delta / vcl_sqrt( maxJJ );
+    sigma4 = sigma4factor * delta / std::sqrt( maxJJ );
   }
   this->SampleGradients(
     this->GetScaledCurrentPosition(), sigma4, gg, ee );
@@ -944,11 +944,11 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
    */
   if( gg > 1e-14 && TrC > 1e-14 )
   {
-    sigma1 = vcl_sqrt( gg / TrC );
+    sigma1 = std::sqrt( gg / TrC );
   }
   if( ee > 1e-14 && TrC > 1e-14 )
   {
-    sigma3 = vcl_sqrt( ee / TrC );
+    sigma3 = std::sqrt( ee / TrC );
   }
 
   const double alpha = 1.0;
@@ -956,14 +956,14 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
   double a_max = 0.0;
   if( sigma1 > 1e-14 && maxJCJ > 1e-14 )
   {
-    a_max = A * delta / sigma1 / vcl_sqrt( maxJCJ );
+    a_max = A * delta / sigma1 / std::sqrt( maxJCJ );
   }
   const double noisefactor = sigma1 * sigma1
     / ( sigma1 * sigma1 + sigma3 * sigma3 + 1e-14 );
   const double a = a_max * noisefactor;
 
   const double omega = vnl_math_max( 1e-14,
-    this->m_SigmoidScaleFactor * sigma3 * sigma3 * vcl_sqrt( TrCC ) );
+    this->m_SigmoidScaleFactor * sigma3 * sigma3 * std::sqrt( TrCC ) );
   const double fmax = 1.0;
   const double fmin = -0.99 + 0.98 * noisefactor;
 
@@ -1079,13 +1079,13 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
     timer5.Start();
     if( maxJJ > 1e-14 )
     {
-      sigma4 = sigma4factor * delta / vcl_sqrt( maxJJ );
+      sigma4 = sigma4factor * delta / std::sqrt( maxJJ );
     }
     this ->SampleGradients( this->GetScaledCurrentPosition(), sigma4, gg, ee );
 
     double noisefactor = gg / ( gg + ee );
     this->m_NoiseFactor = noisefactor;
-    a =  delta * vcl_pow( A + 1.0, alpha ) / jacg * noisefactor;
+    a =  delta * std::pow( A + 1.0, alpha ) / jacg * noisefactor;
     timer5.Stop();
     elxout << "  Compute the noise compensation took "
       << this->ConvertSecondsToDHMS( timer5.GetMean(), 6 )
@@ -1093,7 +1093,7 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
   }
   else
   {
-    a = delta * vcl_pow( A + 1.0, alpha ) / jacg;
+    a = delta * std::pow( A + 1.0, alpha ) / jacg;
   }
 
   /** Set parameters in superclass. */
@@ -1118,16 +1118,14 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
 
   /** Variables for sampler support. Each metric may have a sampler. */
   std::vector< bool >                                 useRandomSampleRegionVec( M, false );
-  std::vector< ImageRandomSamplerBasePointer >        randomSamplerVec( M, 0 );
-  std::vector< ImageRandomCoordinateSamplerPointer >  randomCoordinateSamplerVec( M, 0 );
-  std::vector< ImageGridSamplerPointer >              gridSamplerVec( M, 0 );
+  std::vector< ImageRandomSamplerBasePointer >        randomSamplerVec( M );
+  std::vector< ImageRandomCoordinateSamplerPointer >  randomCoordinateSamplerVec( M );
+  std::vector< ImageGridSamplerPointer >              gridSamplerVec( M );
 
   /** If new samples every iteration, get each sampler, and check if it is
    * a kind of random sampler. If yes, prepare an additional grid sampler
    * for the exact gradients, and set the stochasticgradients flag to true.
    */
-
-
 
   bool stochasticgradients = false;
   if( this->GetNewSamplesEveryIteration() )
@@ -1190,7 +1188,7 @@ AdaptiveStochasticVarianceReducedGradient<TElastix>
           gridSamplerVec[ m ]->SetNumberOfSamples( this->m_NumberOfSpatialSamples );
           gridSamplerVec[ m ]->Update();
         }
-        else if ( sampleGradientMethod == "UseNumberOfSpatialSamples" ) 
+        else if ( sampleGradientMethod == "UseNumberOfSpatialSamples" )
         {
           gridSamplerVec[ m ]->SetNumberOfSamples( this->m_NumberOfSpatialSamples );
           gridSamplerVec[ m ]->Update();
